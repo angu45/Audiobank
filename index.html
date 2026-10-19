@@ -8,6 +8,17 @@
 <link rel="icon" href="assets/icon.svg">
 <link rel="stylesheet" href="styles.css">
 <script type="module" src="https://pyscript.net/releases/2024.11.1/core.js"></script>
+<!-- CSS -->
+<link rel="stylesheet" href="./styles.css">
+
+<!-- PWA -->
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon.svg">
+
+<!-- JavaScript -->
+<script src="./tts-model.js"></script>
+<script src="./export.js"></script>
+<script src="./app.js"></script>
 </head>
 <body>
 <script type="py" src="./python/script_analyzer.py"></script>
@@ -60,6 +71,11 @@
   <button id="next" aria-label="Next chunk">⏭</button>
   <span id="status" role="status">Idle</span>
 </footer>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./service-worker.js");
+}
+</script>
 <div id="toast" role="alert"></div>
 <script type="module" src="app.js"></script>
 </body>
