@@ -1,0 +1,4 @@
+{"models":[
+{"id":"browser-default","name":"Browser Speech (Web Speech API)","engine":"web-speech","runtime":"browser","downloadable":false,"exportable":false,"languages":["dynamic"],"status":"implemented"},
+{"id":"piper-server","name":"Piper via local server","engine":"piper","runtime":"optional-backend","downloadable":true,"exportable":true,"languages":["en","hi","es","fr","de"],"status":"not implemented: needs optional backend"}
+]}

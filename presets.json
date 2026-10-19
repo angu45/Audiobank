@@ -1,0 +1,9 @@
+{"presets":[
+{"id":"natural","name":"Natural","rate":1,"pitch":1,"pause":350},
+{"id":"audiobook","name":"Audiobook","rate":0.95,"pitch":1,"pause":600},
+{"id":"story","name":"Storytelling","rate":0.9,"pitch":1.05,"pause":700},
+{"id":"edu","name":"Educational","rate":0.95,"pitch":1,"pause":500},
+{"id":"podcast","name":"Podcast","rate":1.1,"pitch":1,"pause":300},
+{"id":"slow","name":"Slow narration","rate":0.75,"pitch":0.95,"pause":900},
+{"id":"energetic","name":"Energetic","rate":1.2,"pitch":1.15,"pause":250}
+]}
