@@ -1,3 +1,5 @@
+import {concat,toWav,toMp3,toOpus} from './export.js';
+import * as tts from './tts-model.js';
 const $ = id => document.getElementById(id);
 const DEF = {rate:1, pitch:1, vol:1, pause:600, limit:1500, voice:''};
 const S = {id:null, text:'', pron:'', settings:{...DEF}, chunks:[], cur:-1, token:0};
@@ -53,7 +55,7 @@ function renderChunks(){
     if(c.ch!==last){const h=document.createElement('div');h.className='ch';h.textContent=c.title;frag.append(h);last=c.ch}
     const b=document.createElement('button');b.className='chunk';b.dataset.i=i;b.textContent=`${i+1}. ${c.text}`;frag.append(b);
   });
-  box.append(frag);mark();
+  box.append(frag);mark();fillScope();
 }
 function mark(){document.querySelectorAll('.chunk.on').forEach(e=>e.classList.remove('on'));const e=document.querySelector(`.chunk[data-i="${S.cur}"]`);if(e){e.classList.add('on');e.scrollIntoView({block:'nearest'})}}
 
@@ -154,4 +156,67 @@ addEventListener('beforeunload',()=>{if(hasTTS)speechSynthesis.cancel()});
   const p=last&&await tx('readonly',s=>s.get(last)).catch(()=>null);
   p?load(p):newProject();
   if('serviceWorker' in navigator)navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+})();
+
+// ---------- audio generation and export (real audio, not Web Speech) ----------
+const A = {clips:[], sr:16000, token:0, busy:false, url:null};
+let amodels = [];
+const aStatus = m => $('astat').textContent = m;
+function fillScope(){
+  const sel=$('scope'),keep=sel.value,seen=new Map();
+  S.chunks.forEach(c=>seen.set(c.ch,c.title));
+  sel.replaceChildren(new Option('Whole script','all'));
+  seen.forEach((t,i)=>sel.append(new Option(t,String(i))));
+  sel.value=[...sel.options].some(o=>o.value===keep)?keep:'all';
+}
+async function generate(){
+  if(A.busy){A.token++;return}
+  const m=amodels.find(x=>x.id===$('amodel').value);
+  if(!m)return toast('No exportable voice model configured.');
+  const list=S.chunks.filter(c=>$('scope').value==='all'||String(c.ch)===$('scope').value);
+  if(!list.length)return toast('Add some text first.');
+  if(!tts.isLoaded(m.hf)&&!confirm(`Download “${m.name}” (${m.size})? It is cached by your browser afterward. These MMS models are licensed for non-commercial use.`))return;
+  A.busy=true;const tk=++A.token;A.clips=[];$('expAudio').disabled=true;$('genBtn').textContent='Cancel';
+  try{
+    aStatus('Loading model…');
+    await tts.loadModel(m.hf,p=>{if(p.status==='progress')aStatus(`Downloading model ${Math.round(p.progress)}%`)});
+    for(let i=0;i<list.length;i++){
+      if(tk!==A.token)throw new Error('cancelled');
+      aStatus(`Generating chunk ${i+1} of ${list.length} (${Math.round(i/list.length*100)}%)`);
+      const r=await tts.synth(applyPron(list[i].text));
+      A.clips.push(r.pcm);A.sr=r.sr;
+      await new Promise(r=>setTimeout(r));
+    }
+    const pcm=concat(A.clips,A.sr,S.settings.pause);
+    if(A.url)URL.revokeObjectURL(A.url);
+    A.url=URL.createObjectURL(toWav(pcm,A.sr));$('aprev').src=A.url;$('aprev').hidden=false;
+    $('expAudio').disabled=false;aStatus(`Ready: ${(pcm.length/A.sr/60).toFixed(1)} min of audio. Choose a format and download.`);
+  }catch(e){
+    A.clips=[];
+    if(e.message==='cancelled')aStatus('Cancelled.');
+    else{aStatus('Failed: '+e.message);toast('Audio generation failed. Check your connection and try again.')}
+  }finally{A.busy=false;$('genBtn').textContent='Generate audio'}
+}
+async function exportAudio(){
+  if(!A.clips.length)return toast('Generate audio first.');
+  const fmt=$('fmt').value,btn=$('expAudio');btn.disabled=true;
+  try{
+    const pcm=concat(A.clips,A.sr,S.settings.pause);
+    const sc=$('scope').value,base=safeName($('title').value)+(sc==='all'?'':'_'+safeName($('scope').selectedOptions[0].textContent));
+    let blob,ext;
+    if(fmt==='wav'){blob=toWav(pcm,A.sr);ext='wav'}
+    else if(fmt==='mp3'){blob=await toMp3(pcm,A.sr,p=>aStatus(`Encoding MP3 ${p}%`));ext='mp3'}
+    else{aStatus('Encoding Opus in real time…');blob=await toOpus(pcm,A.sr);ext=blob.type.includes('ogg')?'ogg':'webm'}
+    download(`${base}.${ext}`,blob.type,blob);aStatus(`Exported ${base}.${ext}`);
+  }catch(e){aStatus('Export failed: '+e.message);toast('Export failed: '+e.message)}
+  finally{btn.disabled=false}
+}
+$('genBtn').addEventListener('click',generate);
+$('expAudio').addEventListener('click',exportAudio);
+(async()=>{
+  try{
+    amodels=(await (await fetch('config/models.json')).json()).models.filter(m=>m.exportable&&m.hf);
+    amodels.forEach(m=>$('amodel').append(new Option(m.name,m.id)));
+  }catch{aStatus('Could not load model list.')}
+  fillScope();
 })();
