@@ -40,7 +40,16 @@
     <label>Pause between chunks (ms) <input id="pause" type="number" min="0" max="5000" step="50"></label>
     <label>Max chunk size (characters) <input id="limit" type="number" min="200" max="4000" step="100"></label>
     <label>Pronunciation (one “word=spoken form” per line)<textarea id="pron" rows="4" placeholder="AI=Artificial Intelligence"></textarea></label>
-    <p class="note">Web Speech plays through your speakers. Browsers do not expose that audio, so it cannot be exported as WAV or MP3.</p>
+    <fieldset class="exp"><legend>Audio export</legend>
+    <label>Voice model <select id="amodel"></select></label>
+    <label>Scope <select id="scope"><option value="all">Whole script</option></select></label>
+    <button id="genBtn">Generate audio</button>
+    <audio id="aprev" controls hidden></audio>
+    <label>Format <select id="fmt"><option value="mp3">MP3</option><option value="wav">WAV</option><option value="opus">Opus (WebM/Ogg)</option></select></label>
+    <button id="expAudio" disabled>Download audio</button>
+    <p id="astat" class="note" role="status">Generates real audio in your browser. The model downloads once after you confirm.</p>
+  </fieldset>
+  <p class="note">Web Speech plays through your speakers. Browsers do not expose that audio, so it cannot be exported as WAV or MP3.</p>
   </aside>
 </main>
 <footer class="player">
