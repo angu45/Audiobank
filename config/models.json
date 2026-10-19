@@ -1,4 +1,8 @@
 {"models":[
-{"id":"browser-default","name":"Browser Speech (Web Speech API)","engine":"web-speech","runtime":"browser","downloadable":false,"exportable":false,"languages":["dynamic"],"status":"implemented"},
-{"id":"piper-server","name":"Piper via local server","engine":"piper","runtime":"optional-backend","downloadable":true,"exportable":true,"languages":["en","hi","es","fr","de"],"status":"not implemented: needs optional backend"}
+{"id":"browser-default","name":"Browser Speech (Web Speech API)","engine":"web-speech","runtime":"browser","downloadable":false,"exportable":false,"languages":["dynamic"]},
+{"id":"mms-eng","name":"English (MMS-TTS)","engine":"transformers.js","runtime":"browser-wasm","hf":"Xenova/mms-tts-eng","downloadable":true,"exportable":true,"size":"tens of MB (estimate)","languages":["en"]},
+{"id":"mms-fra","name":"French (MMS-TTS)","engine":"transformers.js","runtime":"browser-wasm","hf":"Xenova/mms-tts-fra","downloadable":true,"exportable":true,"size":"tens of MB (estimate)","languages":["fr"]},
+{"id":"mms-deu","name":"German (MMS-TTS)","engine":"transformers.js","runtime":"browser-wasm","hf":"Xenova/mms-tts-deu","downloadable":true,"exportable":true,"size":"tens of MB (estimate)","languages":["de"]},
+{"id":"mms-spa","name":"Spanish (MMS-TTS)","engine":"transformers.js","runtime":"browser-wasm","hf":"Xenova/mms-tts-spa","downloadable":true,"exportable":true,"size":"tens of MB (estimate)","languages":["es"]},
+{"id":"piper-server","name":"Piper via local server","engine":"piper","runtime":"optional-backend","downloadable":true,"exportable":true,"languages":["en","hi","es","fr","de"],"status":"not implemented"}
 ]}
